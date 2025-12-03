@@ -554,7 +554,24 @@ class GameState(State):
     #   with the ones after it. Depending on the mode, sort by rank first or suit first, swapping cards when needed
     #   until the entire hand is ordered correctly.
     def SortCards(self, sort_by: str = "suit"):
-        suitOrder = [Suit.HEARTS, Suit.CLUBS, Suit.DIAMONDS, Suit.SPADES]         # Define the order of suits
+        suitOrder = [Suit.HEARTS, Suit.CLUBS, Suit.DIAMONDS, Suit.SPADES]
+        n = len(self.hand)
+        for i in range(n):
+            for j in range(i + 1, n):
+                a = self.hand[i]
+                b = self.hand[j]
+                if sort_by == "rank":
+                    if a.rank.value > b.rank.value:
+                        self.hand[i], self.hand[j] = b, a
+                    elif a.rank.value == b.rank.value:
+                        if suitOrder.index(a.suit) > suitOrder.index(b.suit):
+                            self.hand[i], self.hand[j] = b, a
+                else:
+                    if suitOrder.index(a.suit) > suitOrder.index(b.suit):
+                        self.hand[i], self.hand[j] = b, a
+                    elif a.suit == b.suit:
+                        if a.rank.value > b.rank.value:
+                            self.hand[i], self.hand[j] = b, a
         self.updateCards(400, 520, self.cards, self.hand, scale=1.2)
 
     def checkHoverCards(self):
@@ -780,7 +797,6 @@ class GameState(State):
         #       # Apply that Joker’s effect
         #       self.activated_jokers.add("joker card name")
         #   The last line ensures the Joker is visibly active and its effects are properly applied.
-
         procrastinate = False
 
         # commit modified player multiplier and chips
