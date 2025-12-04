@@ -10,4 +10,58 @@ from Cards.Card import Card, Rank
 #   and flags to determine if the hand is: "Four of a Kind", "Full House", "Flush", "Straight", "Three of a Kind",
 #   "Two Pair", "One Pair", or "High Card". Return a string with the correct hand type at the end.
 def evaluate_hand(hand: list[Card]):
+    ranks = [card.rank.value for card in hand]
+    suits = [card.suit for card in hand]
+    rank_counts = {}
+    for r in ranks:
+        rank_counts[r] = rank_counts.get(r, 0) + 1
+    sorted_counts = sorted(rank_counts.values(), reverse=True)
+    suit_counts = {}
+    for s in suits:
+        suit_counts[s] = suit_counts.get(s, 0) + 1
+
+    flush_suit = None
+    for s, c in suit_counts.items():
+        if c >= 5:
+            flush_suit = s
+            break
+
+    unique_ranks = sorted(set(ranks))
+    if 14 in unique_ranks:
+        unique_ranks.append(1)
+        unique_ranks = sorted(unique_ranks)
+
+    straight = False
+    for i in range(len(unique_ranks) - 4):
+        seq = unique_ranks[i:i+5]
+        if seq[4] - seq[0] == 4 and len(set(seq)) == 5:
+            straight = True
+            break
+
+    if flush_suit is not None:
+        flush_cards = sorted([card.rank.value for card in hand if card.suit == flush_suit])
+        ranks_f = set(flush_cards)
+        if 14 in ranks_f:
+            ranks_f.add(1)
+        ranks_f = sorted(ranks_f)
+
+        for i in range(len(ranks_f) - 4):
+            seq = ranks_f[i:i+5]
+            if seq[4] - seq[0] == 4 and len(set(seq)) == 5:
+                return "Straight Flush"
+
+    if sorted_counts[0] == 4:
+        return "Four of a Kind"
+    if sorted_counts[0] == 3 and sorted_counts[1] >= 2:
+        return "Full House"
+    if flush_suit is not None:
+        return "Flush"
+    if straight:
+        return "Straight"
+    if sorted_counts[0] == 3:
+        return "Three of a Kind"
+    if sorted_counts[0] == 2 and sorted_counts[1] == 2:
+        return "Two Pair"
+    if sorted_counts[0] == 2:
+        return "One Pair"
     return "High Card" # If none of the above, it's High Card
